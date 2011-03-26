@@ -165,11 +165,22 @@ class View(QMainWindow, auxilia.Actions):
         loadedPlugins = []
         for plugin in plugins.allPlugins:
             loadedPlugins.append(plugin.getWidget(self, self.mpdclient, self.config))
+        if len(loadedPlugins) > len(self.config.tabOrder):
+            newPlugins = [plugin for plugin in loadedPlugins if plugin.moduleName not in self.config.tabOrder]
+        else:
+            newPlugins = []
         for name in self.config.tabOrder:
             for plugin in loadedPlugins:
                 if plugin.moduleName == name:
                     self.tabs.addTab(plugin, auxilia.PIcon(plugin.moduleIcon), plugin.moduleName)
                     break
+        if len(newPlugins) > 0:
+            order = self.config.tabOrder
+            for plugin in newPlugins:
+                self.tabs.addTab(plugin, auxilia.PIcon(plugin.moduleIcon),
+                                 plugin.moduleName)
+                order.append(plugin.moduleName)
+            self.config.tabOrder = order
 
     def shutdown(self):
         self.shuttingDown = True
